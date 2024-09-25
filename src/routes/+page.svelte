@@ -30,7 +30,7 @@
     </form>
   </div>
   {:else}
-  <h2>tá logado chapa</h2>
+  <h2>tá logado já, chapa</h2>
 {/if}
 
 <style>

@@ -1,38 +1,16 @@
-# create-svelte
+# Loja Anarco  ![logo anarquista](https://github.com/CaiqueMF/trabalho_am2/blob/main/static/icon.png?raw=true)
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+para rodar a aplicação tenha Node instalado, rode:
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+o usuário e senha cadastrado no firebase é
 
-To create a production version of your app:
+usuário: punk@punk.com
 
-```bash
-npm run build
-```
+senha: punk123
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+quaisquer erro gerado durante o uso são disparados no console
