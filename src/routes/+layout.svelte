@@ -1,6 +1,20 @@
 <script>
   import { page } from '$app/stores';
+  import { onAuthStateChanged } from 'firebase/auth';
   import { auth } from '../firebase';
+  import { onMount } from 'svelte';
+
+
+  let user = null;
+
+  // Verifica o estado de autenticação assim que o layout é montado
+  onMount(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      user = firebaseUser;
+    });
+    // Cancela a inscrição ao desmontar o componente
+    return () => unsubscribe();
+  });
 
   //faz logout do usuário e joga ele na página incial
   async function deslogar() {
@@ -18,16 +32,25 @@
   <header>
     <nav>
       <ul>
+        {#if !user}
         <li aria-current={$page.url.pathname === '/' ? 'page' : undefined} class="home">
-          <a href="/">Home</a>
+          <a href="/">Login</a>
         </li>
+        {/if}
+        <li aria-current={$page.url.pathname === '/produtosPublico' ? 'page' : undefined} class="produtos">
+          <a href="/produtosPublico">Comprar Coisa e tal</a>
+        </li>
+        {#if user}
         <li aria-current={$page.url.pathname === '/ProductList' ? 'page' : undefined}>
-          <a href="/ProductList">Lista Produtos</a>
+          <a href="/protected/ProductList">Lista Produtos</a>
         </li>
-        <li>
-          <button on:click={deslogar}>Sair</button>
-        </li>
+        {/if}
       </ul>
+      {#if user}
+      <div class="logout-container">
+        <button class="logout" on:click={deslogar}>Sair</button>
+      </div>
+        {/if} 
     </nav>
   </header>
   <slot></slot>
@@ -102,16 +125,21 @@
     border-bottom: 2px double #ff007f;
   }
 
+  .logout {
+  margin-left: auto;
+}
+
   button {
-    background: #000;
-    color: #ff007f;
-    border: 3px double #ff007f;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: transform 0.3s;
-    transform: rotate(-9deg);
-    box-shadow: -3px 3px 0px #ff007f, -6px 6px 0px #000;
-  }
+  background: #000;
+  color: #ff007f;
+  border: 3px double #ff007f;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  transform: rotate(-9deg);
+  box-shadow: -3px 3px 0px #ff007f, -6px 6px 0px #000;
+  font-size: 20px;
+}
 
   button:hover {
     background: #ff007f;
@@ -136,4 +164,13 @@
     border: none;
     filter: contrast(1.2) brightness(0.9);
   }
+  header nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logout-container {
+  margin-left: auto;
+}
 </style>

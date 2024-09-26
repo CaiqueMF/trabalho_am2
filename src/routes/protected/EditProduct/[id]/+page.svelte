@@ -1,16 +1,12 @@
 <script>
   import { doc, updateDoc, getDoc } from 'firebase/firestore';
   import { page } from '$app/stores';
-  import { db , auth} from '../../../firebase';
+  import { db } from '../../../../firebase';
   import { onMount } from "svelte";
   import { goto } from '$app/navigation';
+  import MandarImagens from '../../../produtosPublico/mandarImagens.svelte';
   
-  //comportamento padrão de redirecionamento de usuário caso não esteja logado
-  onMount(() => {
-    if (!auth.currentUser) {
-      goto("/");
-    }
-  });
+
 
   let nome = '';
   let descricao = '';
@@ -38,7 +34,7 @@
     await updateDoc(docRef, {
       nome, descricao, preco
     });
-    goto("/ProductList")
+    goto("/protected/ProductList")
   }
 
 </script>
@@ -48,6 +44,7 @@
     <input type="text" bind:value={nome} placeholder={produto.nome} />
     <input type="text" bind:value={descricao} placeholder={produto.descricao} />
     <input type="text" bind:value={preco} placeholder={produto.preco} />
+    <MandarImagens imageId={idProduto}/>
     <button on:click={atualizarProduto}>Atualizar Produto</button>
   </div>
 </div>

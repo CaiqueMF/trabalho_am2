@@ -2,15 +2,8 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { doc, getDoc} from 'firebase/firestore';
-  import { db, auth } from '../../../firebase';
-  import { goto } from '$app/navigation';
-
-  //comportamento padrão de redirecionamento de usuário caso não esteja logado
-  onMount(() => {
-    if (!auth.currentUser) {
-      goto("/");
-    }
-  });
+  import { db } from '../../../../firebase';
+  import MandarImagens from '../../../produtosPublico/mandarImagens.svelte';
 
   let produto = {};
   let idProduto;
@@ -33,7 +26,8 @@
     <h1>{produto.nome}</h1>
     <p>{produto.descricao}</p>
     <p>Preço: {produto.preco}</p>
-    <a href={`/EditProduct/${idProduto}`} class="link-editar">Editar</a>
+    <MandarImagens imageId={idProduto}/>
+    <a href={`/protected/EditProduct/${idProduto}`} class="link-editar">Editar</a>
   </div>
 </div>
   
@@ -52,6 +46,7 @@
     border-radius: 8px;
     padding: 20px;
     margin: 15px;
+    margin-bottom: 30px;
     width: 30%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     transition: transform 0.3s;

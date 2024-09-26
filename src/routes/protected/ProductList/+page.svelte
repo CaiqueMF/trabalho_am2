@@ -1,15 +1,9 @@
 <script>
   import { onMount } from 'svelte';
   import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
-  import { db, auth } from '../../firebase';
-  import { goto } from '$app/navigation';
+  import { db } from '../../../firebase';
 
-  //comportamento padrão de redirecionamento de usuário caso não esteja logado
-  onMount(() => {
-    if (!auth.currentUser) {
-        goto("/");
-    }
-  });
+
 
   let produtos = [];
 
@@ -32,13 +26,13 @@
 
 </script>
 
-<a class="adicionar" href="/AddProduct">Adicionar Produto</a>
+<a class="adicionar" href="/protected/AddProduct">Adicionar Produto</a>
 <div class="grid-produtos">
   {#each produtos as produto}
       <div class="card-produto">
           <h3>{produto.nome}</h3>
           <p>R${produto.preco}</p>
-          <a href={`/product/${produto.id}`} class="detalhes">Ver detalhes</a>
+          <a href={`/protected/product/${produto.id}`} class="detalhes">Ver detalhes</a>
           <button on:click={() => detelarProduto(produto.id)} class="remover">Remover</button>
       </div>
   {/each}
@@ -62,7 +56,7 @@
 
   .grid-produtos {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     padding: 20px;
     margin-bottom: 20px;

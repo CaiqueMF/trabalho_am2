@@ -10,7 +10,7 @@
   async function login() {
     try {
       await signInWithEmailAndPassword(auth, email, senha);
-      goto("/ProductList")
+      goto("/protected/ProductList")
     } catch (error) {
       console.error(error);
     }

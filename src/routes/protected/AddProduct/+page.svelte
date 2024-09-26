@@ -1,19 +1,12 @@
 <script>
   import { collection, addDoc } from 'firebase/firestore';
-  import { db,auth } from '../../firebase';
-  import { onMount } from "svelte";
+  import { db} from '../../../firebase';
   import { goto } from '$app/navigation';
 
-  //comportamento padrão de redirecionamento de usuário caso não esteja logado
-  onMount(() => {
-    if (!auth.currentUser) {
-      goto("/");
-    }
-  });
 
-  let nome = '';
-  let descricao = '';
-  let preco = '';
+  let nome;
+  let descricao;
+  let preco;
 
   //joga no banco um novo produto com as caracteristicas digitadas
   async function adicionarProduto() {
@@ -21,7 +14,7 @@
       await addDoc(collection(db, 'produtos'), {
         nome, descricao, preco
       });
-      goto("/ProductList")
+      goto("/protected/ProductList")
     } catch (error) {
       console.error(error);
     }
