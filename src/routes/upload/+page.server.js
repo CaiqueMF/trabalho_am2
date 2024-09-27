@@ -1,8 +1,6 @@
-// src/routes/upload/+page.server.js
 import fs from 'fs';
 import { join } from 'path';
 
-/** @type {import('./$types').Actions} */
 export const actions = {
     default: async ({ request }) => {
       const data = await request.formData();
@@ -30,7 +28,7 @@ export const actions = {
         fs.writeFileSync(filePath, buffer);
         return {
           success: true,
-          imageUrl: `/images/${filename}` // Certifique-se de retornar a URL da imagem corretamente
+          urlImagem: `/images/${filename}`
         };
       } catch (error) {
         return {

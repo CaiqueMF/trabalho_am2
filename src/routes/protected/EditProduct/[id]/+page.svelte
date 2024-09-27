@@ -44,7 +44,7 @@
     <input type="text" bind:value={nome} placeholder={produto.nome} />
     <input type="text" bind:value={descricao} placeholder={produto.descricao} />
     <input type="text" bind:value={preco} placeholder={produto.preco} />
-    <MandarImagens imageId={idProduto}/>
+    <MandarImagens idImagem={idProduto}/>
     <button on:click={atualizarProduto}>Atualizar Produto</button>
   </div>
 </div>

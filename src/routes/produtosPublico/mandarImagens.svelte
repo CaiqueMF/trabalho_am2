@@ -1,33 +1,33 @@
 <script>
     import {auth} from '../../firebase'
 
-    export let imageId = ''; // Defina a prop para receber o ID
-    let imageUrl = '';
-    let imageNotFound = false;
-    let errorMessage = '';
+    export let idImagem = ''; // Defina a prop para receber o ID
+    let urlImagem = '';
+    let naoAchouImagem = false;
+    let mensagemErro = '';
   
     // Função para verificar se a imagem existe
-    const checkImageExists = async () => {
+    const checarImagemExiste = async () => {
       try {
-        const res = await fetch(`/images/${imageId}.jpg`);
+        const res = await fetch(`/images/${idImagem}.jpg`);
         if (res.ok) {
-          imageUrl = res.url;
-          imageNotFound = false;
+          urlImagem = res.url;
+          naoAchouImagem = false;
         } else {
-          imageNotFound = true;
+          naoAchouImagem = true;
         }
       } catch (error) {
-        imageNotFound = true;
+        naoAchouImagem = true;
       }
     };
   
-    const handleDrop = async (event) => {
+    const jogarImagem = async (event) => {
       event.preventDefault();
       const file = event.dataTransfer.files[0];
       if (file && file.type.startsWith('image/')) {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('id', imageId);
+        formData.append('id', idImagem);
   
         try {
           const response = await fetch('/upload', {
@@ -37,16 +37,16 @@
           const result = await response.json();
   
           if (result.success) {
-            imageUrl = result.imageUrl;
-            imageNotFound = false;
+            urlImagem = result.urlImagem;
+            naoAchouImagem = false;
           } else {
-            checkImageExists()
+            checarImagemExiste()
         }
         } catch (error) {
-          errorMessage = 'Erro ao fazer upload da imagem.';
+          mensagemErro = 'Erro ao fazer upload da imagem.';
         }
       } else {
-        errorMessage = 'Por favor, envie um arquivo de imagem válido.';
+        mensagemErro = 'Por favor, envie um arquivo de imagem válido.';
       }
     };
   
@@ -54,9 +54,9 @@
       event.preventDefault();
     };
   
-    const handleDelete = async () => {
+    const deletarImagem = async () => {
     const formData = new FormData();
-    formData.append('id', imageId);
+    formData.append('id', idImagem);
 
     try {
       const response = await fetch('/delete', {
@@ -67,48 +67,57 @@
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          imageUrl = '';
-          imageNotFound = true;
+          urlImagem = '';
+          naoAchouImagem = true;
 
         } else {
-          errorMessage = result.error;
+          mensagemErro = result.error;
         }
       } 
     } catch (error) {
       console.log('Erro ao excluir a imagem.');
     }
-    checkImageExists()
+    checarImagemExiste()
   };
 
-    $: if (imageId) {
-      checkImageExists();
+    $: if (idImagem) {
+      checarImagemExiste();
     }
   </script>
   
-  {#if imageNotFound && auth.currentUser}
+  {#if naoAchouImagem && auth.currentUser}
   <div
-  on:drop={handleDrop}
+  on:drop={jogarImagem}
   on:dragover={handleDragOver}
-  class="dropzone"
+  class="soltar-imagem"
   role="button"
   aria-label="Área para arrastar e soltar uma imagem"
   tabindex="0">
-  <p>Arraste e solte uma imagem aqui para o ID: {imageId}</p>
-  {#if errorMessage}
-    <p class="error">{errorMessage}</p>
+  <p>Arraste e solte uma imagem aqui</p>
+  {#if mensagemErro}
+    <p class="error">{mensagemErro}</p>
   {/if}
 </div>
-  {:else}
-    <div class="image-display">
-      <img src={imageUrl} alt="Produto sem Imagem" />
-      {#if auth.currentUser}
-        <button class="delete-btn" on:click={handleDelete}>Excluir</button>
-      {/if}
-    </div>
+    {:else}
+    <div class="container">
+        <div class="display-imagem">
+            <img src={urlImagem} alt="Produto sem Imagem" />
+            {#if auth.currentUser}
+              <button class="botao-deletar" on:click={deletarImagem}>Excluir</button>
+            {/if}
+          </div>
+    </div> 
   {/if}
-  
+
+
   <style>
-    .dropzone {
+    .container {
+        position: relative;
+    }
+    .display-imagem {
+        position: relative;
+    }
+    .soltar-imagem {
       border: 2px dashed #ccc;
       padding: 20px;
       text-align: center;
@@ -116,13 +125,36 @@
       cursor: pointer;
     }
   
-    .image-display img {
+    .display-imagem img {
       max-width: 100%;
       height: auto;
+      max-height: 350px;
     }
   
     .error {
       color: red;
     }
+
+    .botao-deletar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #ff007f;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+    font-family: 'Special Elite', sans-serif;
+    font-weight: bold;
+    font-size: 35px;
+    
+
+  }
+
+  .botao-deletar:hover {
+    opacity: 1;
+  }
   </style>
   

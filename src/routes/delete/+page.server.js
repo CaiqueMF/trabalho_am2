@@ -1,6 +1,8 @@
 import fs from 'fs';
 import { join } from 'path';
 
+
+//código para receber o id de uma imagem e excluir o arquivo da mesma de static/images
 export const actions = {
   default: async ({ request }) => {
     const data = await request.formData();

@@ -79,7 +79,6 @@
     background-position: center;
     height: 100vh;
     width: 100vw;
-    overflow-x: hidden;
     overflow-y: auto;
     margin: 0;
     box-sizing: border-box;

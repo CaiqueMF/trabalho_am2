@@ -26,7 +26,7 @@
     <h1>{produto.nome}</h1>
     <p>{produto.descricao}</p>
     <p>Preço: {produto.preco}</p>
-    <MandarImagens imageId={idProduto}/>
+    <MandarImagens idImagem={idProduto}/>
     <a href={`/protected/EditProduct/${idProduto}`} class="link-editar">Editar</a>
   </div>
 </div>

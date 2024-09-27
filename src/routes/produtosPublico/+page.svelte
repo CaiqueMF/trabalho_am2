@@ -2,56 +2,58 @@
     import { onMount } from 'svelte';
     import { collection, getDocs, doc, deleteDoc , query} from 'firebase/firestore';
     import { auth, db } from '../../firebase';
-  import MandarImagens from './mandarImagens.svelte';
+    import MandarImagens from './MandarImagens.svelte';
+  import Carrinho from './carrinho.svelte';
 
+    //tela pra apresentar todos os produtos para o público
     let produtos = [];
     let produtosPaginados = [];
     let ordenar = "nome";
     let pagina = 1;
     let numeroMaximo = 18;
     let totalPaginas = 1;
+    let carrinho = [];
 
     // Função para carregar os produtos e definir a quantidade total de páginas
     async function carregarProdutos() {
-    const q = query(collection(db, "produtos")); // Não vamos ordenar diretamente no Firestore
-    const querySnapshot = await getDocs(q);
-    
-    produtos = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+        const q = query(collection(db, "produtos"));
+        const querySnapshot = await getDocs(q);
 
-    // Se o campo de ordenação for 'preco', ordenamos manualmente, lidando com strings
-    if (ordenar === "preco") {
+        produtos = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        //como acabei deixando todas as caixas do banco como strings a comparação de preço precisa ser feita com funçõoes
+        if (ordenar === "preco") {
         produtos = produtos.sort((a, b) => {
-            // Tente converter ambos os preços para números
             const precoA = parseFloat(a.preco);
             const precoB = parseFloat(b.preco);
 
-            // Se não for um número, considere-o como um valor muito alto para ficar no final
+            //se não for número jogar pro final do array
             if (isNaN(precoA)) return 1;
             if (isNaN(precoB)) return -1;
 
-            return precoA - precoB; // Ordenação crescente
+            return precoA - precoB;
         });
-    } else {
-        // Se não for preco, ordena normalmente pela chave
-        produtos = produtos.sort((a, b) => {
+        } else {
+            //ordenando por nome
+            produtos = produtos.sort((a, b) => {
             if (a[ordenar] < b[ordenar]) return -1;
             if (a[ordenar] > b[ordenar]) return 1;
             return 0;
-        });
-    }
+            });
+        }
 
-    totalPaginas = Math.ceil(produtos.length / numeroMaximo);
-    atualizarProdutosPaginados();
-}
+        totalPaginas = Math.ceil(produtos.length / numeroMaximo);
+        atualizarProdutosPaginados();
+    }
 
     // Atualiza a lista de produtos que serão exibidos na página atual
     function atualizarProdutosPaginados() {
-        const startIndex = (pagina - 1) * numeroMaximo;
-        const endIndex = startIndex + numeroMaximo;
-        produtosPaginados = produtos.slice(startIndex, endIndex);
+        const indexInicial = (pagina - 1) * numeroMaximo;
+        const indexFinal = indexInicial + numeroMaximo;
+        produtosPaginados = produtos.slice(indexInicial, indexFinal);
     }
 
     // Deleta um produto e recarrega a lista
@@ -63,28 +65,29 @@
     // Ordena os produtos e recarrega a página
     async function sortOption(tipo) {
         ordenar = tipo;
-        await carregarProdutos();
         pagina = 1;
-        atualizarProdutosPaginados();
+        await carregarProdutos();
     }
 
-    // Muda para a página anterior
-    function paginaAnterior() {
-        if (pagina > 1) {
-            pagina -= 1;
+    function mudaPagina(direcao) {
+        if (pagina + direcao >= 1 && pagina + direcao <= totalPaginas) {
+            pagina += direcao;
             atualizarProdutosPaginados();
         }
     }
 
-    // Muda para a próxima página
-    function proximaPagina() {
-        if (pagina < totalPaginas) {
-            pagina += 1;
-            atualizarProdutosPaginados();
-        }
+    function adicionarAoCarrinho(produto) {
+    let itemExistente = carrinho.find(item => item.id === produto.id);
+    if (itemExistente) {
+        itemExistente.quantidade += 1;
+    } else {
+        carrinho = [...carrinho, { ...produto, quantidade: 1 }];
     }
-
-    // Ao montar a página, carrega os produtos
+    
+    // Forçando a reatividade quando há atualização de quantidade
+    carrinho = [...carrinho];
+}
+    
     onMount(async () => {
         await carregarProdutos();
     });
@@ -100,25 +103,39 @@
 <div class="grid-produtos">
     {#each produtosPaginados as produto}
         <div class="card-produto">
-            <h3>{produto.nome}</h3>
-            <p>R${produto.preco}</p>
-            <MandarImagens imageId={produto.id}/>
+            <div style="display: flex;">
+                <div style="min-width: 50%;">
+                    <h3>{produto.nome}</h3>
+                    <p>R${produto.preco}</p>
+                </div>
+                <MandarImagens class="imagem" idImagem={produto.id}/>
+            </div>
+            <button on:click={() => adicionarAoCarrinho(produto)} class="comprar">Pegar emprestado</button>
             {#if auth.currentUser}
             <a href={`/protected/product/${produto.id}`} class="detalhes">Ver detalhes</a>
-            <button on:click={() => deletarProduto(produto.id)} class="remover">Remover</button>     
+            <button on:click={() => deletarProduto(produto.id)} class="remover">Remover</button>    
             {/if}
         </div>
-        
     {/each}
 </div>
 
+<Carrinho {carrinho}/>
+
+{#if totalPaginas!=1}
 <div class="paginacao">
-    <button on:click={paginaAnterior} disabled={pagina === 1} class="navegacao">&larr; Anterior</button>
+    <button on:click={()=>{mudaPagina(-1)}} disabled={pagina === 1} class="navegacao">&larr;</button>
     <span>Página {pagina} de {totalPaginas}</span>
-    <button on:click={proximaPagina} disabled={pagina === totalPaginas} class="navegacao">Próxima &rarr;</button>
+    <button on:click={()=>{mudaPagina(1)}} disabled={pagina === totalPaginas} class="navegacao">&rarr;</button>
 </div>
+{/if}
+
 
 <style>
+    .ordenar {
+        display: flex;
+        align-items: center;
+    }
+
     .grid-produtos {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -176,14 +193,28 @@
         margin-top: 20px;
     }
 
-    .navegacao {
-        background-color: #ff007f;
-        color: #fff;
-        border: none;
+    button {
         padding: 10px 20px;
+        margin: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #000;
+        background: #ff007f;
+        border: 3px double #000;
         cursor: pointer;
-        margin: 0 10px;
-        transition: background-color 0.3s;
+        transition: transform 0.3s;
+        box-shadow: -3px 3px 0px #000, -6px 6px 0px #ff007f;
+        transform: rotate(4deg);
+    }
+
+    button:hover:not(:disabled){
+        transform: rotate(-2deg);
+        background: #fff;
+        color: #ff007f;
+    }
+
+    .ordenar button{
+        max-height: 40px;
     }
 
     .navegacao:disabled {
@@ -191,7 +222,4 @@
         cursor: not-allowed;
     }
 
-    .navegacao:hover:not(:disabled) {
-        background-color: #ff50a0;
-    }
 </style>
